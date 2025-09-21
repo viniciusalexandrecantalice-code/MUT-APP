@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>MUT APP</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fafafa;cursor:url('https://i.ibb.co/mhB8X0p/cursor-bolinha.png'),auto;display:flex;justify-content:center;}
+#container{width:550px;background:#fff;border-radius:20px;margin:20px;padding:20px;box-shadow:0 0 20px rgba(0,0,0,0.2);display:flex;flex-direction:column;transition:0.3s;}
+h1,h2,h3{text-align:center;color:#262626;}
+input,select,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid #dbdbdb;font-size:14px;box-sizing:border-box;transition:0.2s;}
+input:focus,select:focus,textarea:focus{border-color:#3897f0;outline:none;}
+textarea{resize:none;}
+button{background:#3897f0;color:#fff;font-weight:bold;border:none;border-radius:8px;padding:10px;margin:5px 0;cursor:pointer;transition:0.2s;}
+button:hover{background:#2a76c7;transform:scale(1.03);}
+#perfil{text-align:center;padding:20px;border-bottom:1px solid #dbdbdb;display:flex;flex-direction:column;align-items:center;}
+#perfil img{width:100px;height:100px;border-radius:50%;border:2px solid #3897f0;margin-bottom:10px;transition:0.3s;}
+#perfil img:hover{transform:scale(1.1);}
+#perfil h2{margin:5px 0;font-size:22px;}
+.verificado{color:#1da1f2;margin-left:5px;}
+.hidden{display:none;}
+#friends,#chat,#meusPosts,#criarPost,#feed,#admin{padding:15px;margin-bottom:15px;border-radius:12px;background:#f9f9f9;position:relative;}
+.friend-item{display:flex;align-items:center;background:#fafafa;margin:5px 0;padding:5px 10px;border-radius:12px;border:1px solid #dbdbdb;transition:0.2s;}
+.friend-item:hover{background:#f0f0f0;transform:scale(1.02);}
+.friend-item img{width:35px;height:35px;border-radius:50%;margin-right:10px;}
+#mensagens{max-height:220px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;scroll-behavior:smooth;}
+.msg{padding:8px 12px;margin:5px 0;border-radius:15px;max-width:80%;word-wrap:break-word;color:#262626;transition:0.2s;}
+.msg.you{background:#d6f0ff;align-self:flex-end;}
+.msg.friend{background:#f0f0f0;align-self:flex-start;color:#0077ff;}
+.post{background:#fff;margin:12px 0;border-radius:12px;border:1px solid #dbdbdb;transition:0.2s;display:flex;flex-direction:column;overflow:hidden;}
+.post:hover{transform:scale(1.02);box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.post-header{display:flex;align-items:center;padding:10px;}
+.post-header img{width:40px;height:40px;border-radius:50%;margin-right:10px;}
+.post-content img{max-width:100%;}
+.post-content p{padding:0 10px 10px 10px;cursor:pointer;}
+.post-footer{display:flex;justify-content:space-between;padding:0 10px 10px 10px;gap:10px;flex-wrap:wrap;}
+.main-buttons button{width:48%;margin:5px 1%;}
+.closeBtn{position:absolute;top:10px;right:10px;background:#ff4d4d;padding:5px 10px;font-size:12px;}
+.closeBtn:hover{background:#cc0000;}
+#logo{text-align:center;margin-bottom:15px;}
+</style>
+</head>
+<body>
+<div id="container">
+<h1>MUT APP</h1>
+<div id="logo"><canvas id="logoCanvas" width="200" height="100"></canvas></div>
+
+<div id="auth">
+<h2>Registrar / Login</h2>
+<input id="nick" placeholder="Nick">
+<input id="senha" type="password" placeholder="Senha">
+<input id="foto" placeholder="URL da foto (só p/ registro)">
+<button onclick="registrar()">Registrar</button>
+<button onclick="login()">Login</button>
+</div>
+
+<div id="app" class="hidden">
+<div id="perfil">
+<img id="userFoto" src="" alt="Foto">
+<h2 id="userName"></h2>
+<button onclick="logout()">Sair</button>
+<button onclick="mostrar('meusPosts')">Meus Posts</button>
+</div>
+
+<div id="feed" class="hidden">
+<button class="closeBtn" onclick="fechar('feed')">X</button>
+<input id="hashtagFiltro" placeholder="Filtrar por hashtag" oninput="atualizarFeed()">
+<div id="feedLista"></div>
+</div>
+
+<div id="criarPost" class="hidden">
+<button class="closeBtn" onclick="fechar('criarPost')">X</button>
+<h3>Criar Post</h3>
+<textarea id="postTexto" placeholder="Escreva algo..."></textarea>
+<input id="postFoto" placeholder="URL da foto">
+<button onclick="criarPost()">Postar</button>
+</div>
+
+<div id="meusPosts" class="hidden">
+<button class="closeBtn" onclick="fechar('meusPosts')">X</button>
+<h3>Meus Posts</h3>
+<div id="meusPostsLista"></div>
+</div>
+
+<div id="friends" class="hidden">
+<button class="closeBtn" onclick="fechar('friends')">X</button>
+<h3>Amigos</h3>
+<input id="amigoNick" placeholder="Nick do amigo">
+<button onclick="adicionarAmigo()">Adicionar</button>
+<div id="listaAmigos"></div>
+</div>
+
+<div id="chat" class="hidden">
+<button class="closeBtn" onclick="fechar('chat')">X</button>
+<h3>Mensagens</h3>
+<select id="chatAmigo" onchange="atualizarMensagens()"></select>
+<div id="mensagens"></div>
+<input id="novaMsg" placeholder="Mensagem">
+<button onclick="enviarMensagem()">Enviar</button>
+</div>
+
+<div id="admin" class="hidden">
+<button class="closeBtn" onclick="fechar('admin')">X</button>
+<h3>Admin Área</h3>
+<input id="banNick" placeholder="Nick para banir">
+<button onclick="banir()">Banir</button>
+<h4>Posts</h4>
+<div id="todosPosts"></div>
+<h4>Denúncias</h4>
+<div id="denunciasLista"></div>
+</div>
+
+<div class="main-buttons">
+<button onclick="mostrar('friends')">Amigos</button>
+<button onclick="mostrar('chat')">Chat</button>
+<button onclick="mostrar('criarPost')">Criar Post</button>
+<button onclick="mostrar('feed')">Feed</button>
+<button onclick="mostrar('meusPosts')">Meus Posts</button>
+<button id="btnAdmin" onclick="mostrar('admin')" class="hidden">Área do Dono</button>
+</div>
+</div>
+</div>
+
+<script>
+// Logo animado
+const canvas=document.getElementById('logoCanvas'); const ctx=canvas.getContext('2d');
+function desenharLogo(){ ctx.clearRect(0,0,canvas.width,canvas.height); const grad=ctx.createLinearGradient(0,0,canvas.width,canvas.height); grad.addColorStop(0,'#cce6ff'); grad.addColorStop(1,'#ffffff'); ctx.fillStyle=grad; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.font="bold 28px Arial"; ctx.fillStyle="#003366"; ctx.textAlign="center"; ctx.fillText("MUT APP",canvas.width/2,canvas.height/2+10); for(let i=0;i<5;i++){ const x=Math.random()*canvas.width; const y=Math.random()*canvas.height; ctx.strokeStyle="#66ccff"; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.random()*20-10,y+Math.random()*20-10); ctx.stroke(); }}
+setInterval(desenharLogo,200);
+
+// Dados
+let usuarios=JSON.parse(localStorage.getItem('usuarios')||'{}');
+let posts=JSON.parse(localStorage.getItem('posts')||'[]');
+let denuncias=JSON.parse(localStorage.getItem('denuncias')||'[]');
+let usuarioLogado=null;
+const proibidas=["+18","porno","xxx","nsfw"];
+const DONO_NICK="mutano."; const DONO_SENHA="24170406";
+function salvar(){ localStorage.setItem('usuarios',JSON.stringify(usuarios)); localStorage.setItem('posts',JSON.stringify(posts)); localStorage.setItem('denuncias',JSON.stringify(denuncias)); }
+function isAdult(txt){ txt=txt.toLowerCase(); return proibidas.some(p=>txt.includes(p)); }
+
+function registrar(){ const nick=document.getElementById('nick').value.trim(); const senha=document.getElementById('senha').value; const foto=document.getElementById('foto').value.trim(); if(!nick||!senha) return alert("Preencha nick e senha"); if(isAdult(nick)||isAdult(foto)) return alert("Nick/Foto inválido (+18 proibido)"); if(usuarios[nick]) return alert("Nick já existe"); usuarios[nick]={senha,foto,amigos:[],mensagens:{},seguidores:0}; salvar(); alert("Registrado com sucesso!"); }
+function login(){ const nick=document.getElementById('nick').value.trim(); const senha=document.getElementById('senha').value; if(usuarios[nick]&&usuarios[nick].senha===senha){ usuarioLogado=nick; document.getElementById('userName').innerHTML=nick+(usuarios[nick].seguidores>=100?'<span class="verificado">✔️</span>':''); document.getElementById('userFoto').src=usuarios[nick].foto||''; document.getElementById('auth').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); document.getElementById('btnAdmin').classList.toggle('hidden', nick!==DONO_NICK); atualizarAmigos(); atualizarFeed(); atualizarMeusPosts(); atualizarTodosPosts(); atualizarDenuncias(); } else alert("Credenciais inválidas"); }
+function logout(){ usuarioLogado=null; document.getElementById('app').classList.add('hidden'); document.getElementById('auth').classList.remove('hidden'); }
+function mostrar(sec){ ['friends','chat','criarPost','feed','meusPosts','admin'].forEach(id=>document.getElementById(id)?.classList.add('hidden')); if(sec) document.getElementById(sec)?.classList.remove('hidden'); if(sec==='chat') atualizarChatSelect(); if(sec==='feed') atualizarFeed(); if(sec==='meusPosts') atualizarMeusPosts();}
+function fechar(sec){ document.getElementById(sec)?.classList.add('hidden'); }
+
+function adicionarAmigo(){ const nickAmigo=document.getElementById('amigoNick').value.trim(); if(!usuarios[nickAmigo]) return alert("Usuário não existe"); if(nickAmigo===usuarioLogado) return alert("Não pode adicionar você mesmo"); let user=usuarios[usuarioLogado]; if(!user.amigos.includes(nickAmigo)) user.amigos.push(nickAmigo); usuarios[nickAmigo].seguidores++; salvar(); atualizarAmigos(); alert("Amigo adicionado!"); }
+function atualizarAmigos(){ const lista=document.getElementById('listaAmigos'); lista.innerHTML=''; usuarios[usuarioLogado]?.amigos.forEach(a=>{ let div=document.createElement('div'); div.className='friend-item'; div.innerHTML=`<img src="${usuarios[a]?.foto||''}"> <span>${a}</span>`; lista.appendChild(div); }); }
+
+// Criar Post
+function criarPost(){ const txt=document.getElementById('postTexto').value.trim(); const foto=document.getElementById('postFoto').value.trim(); if(!txt&&!foto) return alert("Escreva ou coloque foto"); if(isAdult(txt)||isAdult(foto)) return alert("+18 proibido"); posts.unshift({autor:usuarioLogado,texto:txt,foto:foto,data:new Date().toLocaleString(),curtidas:0,comentarios:[],hashtags:txt.match(/#\w+/g)||[],favoritos:[]}); salvar(); atualizarFeed(); atualizarMeusPosts(); atualizarTodosPosts(); document.getElementById('postTexto').value=''; document.getElementById('postFoto').value=''; }
+
+// Feed
+function atualizarFeed(){ const feed=document.getElementById('feedLista'); feed.innerHTML=''; const filtro=document.getElementById('hashtagFiltro').value.trim(); posts.forEach((p,i)=>{ if(filtro && !p.hashtags.includes(filtro)) return; let div=document.createElement('div'); div.className='post'; div.innerHTML=`<div class="post-header"><img src="${usuarios[p.autor].foto||''}"><span>${p.autor}</span></div><div class="post-content"><p onclick="document.getElementById('hashtagFiltro').value=this.innerText;atualizarFeed()">${p.texto}</p>${p.foto?`<img src="${p.foto}">`:''}</div><div class="post-footer"><button onclick="curtir(${i})">❤️ ${p.curtidas}</button><button onclick="favoritar(${i})">⭐</button><button onclick="comentar(${i})">💬 ${p.comentarios.length}</button>${p.autor===usuarioLogado||usuarioLogado===DONO_NICK?`<button onclick="excluirPost(${i})">🗑️</button>`:''}</div>`; feed.appendChild(div); }); }
+
+// Funções posts
+function curtir(i){ posts[i].curtidas++; salvar(); atualizarFeed(); atualizarMeusPosts(); atualizarTodosPosts(); }
+function favoritar(i){ if(!posts[i].favoritos.includes(usuarioLogado)) posts[i].favoritos.push(usuarioLogado); salvar(); }
+function comentar(i){ let txt=prompt("Comentário:"); if(txt){ posts[i].comentarios.push({autor:usuarioLogado,texto:txt}); salvar(); atualizarFeed(); atualizarMeusPosts(); atualizarTodosPosts(); } }
+function excluirPost(i){ if(posts[i].autor===usuarioLogado||usuarioLogado===DONO_NICK){ if(confirm("Excluir post?")){ posts.splice(i,1); salvar(); atualizarFeed(); atualizarMeusPosts(); atualizarTodosPosts(); } } }
+
+// Meus Posts
+function atualizarMeusPosts(){ const feed=document.getElementById('meusPostsLista'); feed.innerHTML=''; posts.forEach((p,i)=>{ if(p.autor===usuarioLogado){ let div=document.createElement('div'); div.className='post'; div.innerHTML=`<div class="post-header"><img src="${usuarios[p.autor].foto||''}"><span>${p.autor}</span></div><div class="post-content"><p>${p.texto}</p>${p.foto?`<img src="${p.foto}">`:''}</div><div class="post-footer"><button onclick="excluirPost(${i})">🗑️</button></div>`; feed.appendChild(div); } }); }
+
+// Todos posts admin
+function atualizarTodosPosts(){ const feed=document.getElementById('todosPosts'); feed.innerHTML=''; posts.forEach((p,i)=>{ let div=document.createElement('div'); div.className='post'; div.innerHTML=`<div class="post-header"><img src="${usuarios[p.autor].foto||''}"><span>${p.autor}</span></div><div class="post-content"><p>${p.texto}</p>${p.foto?`<img src="${p.foto}">`:''}</div><div class="post-footer"><button onclick="excluirPost(${i})">🗑️</button></div>`; feed.appendChild(div); }); }
+
+// Denúncias
+function denunciar(){ const amigo=document.getElementById('chatAmigo').value; if(!amigo) return alert("Escolha amigo"); denuncias.push({denunciante:usuarioLogado,denunciado:amigo,data:new Date().toLocaleString()}); salvar(); atualizarDenuncias(); alert("Denúncia enviada!"); }
+function atualizarDenuncias(){ const div=document.getElementById('denunciasLista'); div.innerHTML=''; denuncias.forEach(d=>{ let e=document.createElement('div'); e.innerText=`${d.denunciante} denunciou ${d.denunciado} em ${d.data}`; div.appendChild(e); }); }
+
+// Chat
+function atualizarChatSelect(){ const sel=document.getElementById('chatAmigo'); sel.innerHTML=''; usuarios[usuarioLogado].amigos.forEach(a=>{ let opt=document.createElement('option'); opt.value=a; opt.innerText=a; sel.appendChild(opt); }); atualizarMensagens(); }
+function enviarMensagem(){ const amigo=document.getElementById('chatAmigo').value; const msg=document.getElementById('novaMsg').value.trim(); if(!amigo||!msg) return; if(isAdult(msg)) return alert("+18 proibido"); if(!usuarios[usuarioLogado].mensagens[amigo]) usuarios[usuarioLogado].mensagens[amigo]=[]; if(!usuarios[amigo].mensagens[usuarioLogado]) usuarios[amigo].mensagens[usuarioLogado]=[]; usuarios[usuarioLogado].mensagens[amigo].push({de:usuarioLogado,texto:msg}); usuarios[amigo].mensagens[usuarioLogado].push({de:usuarioLogado,texto:msg}); salvar(); atualizarMensagens(); document.getElementById('novaMsg').value=''; }
+function atualizarMensagens(){ const amigo=document.getElementById('chatAmigo').value; const div=document.getElementById('mensagens'); div.innerHTML=''; if(!amigo) return; usuarios[usuarioLogado].mensagens[amigo]?.forEach(m=>{ let e=document.createElement('div'); e.className='msg '+(m.de===usuarioLogado?'you':'friend'); e.innerText=m.texto; div.appendChild(e); }); div.scrollTop=div.scrollHeight; }
+
+// Admin
+function banir(){ const nick=document.getElementById('banNick').value.trim(); if(usuarioLogado===DONO_NICK && usuarios[nick]){ delete usuarios[nick]; salvar(); atualizarAmigos(); atualizarFeed(); atualizarMeusPosts(); atualizarTodosPosts(); alert("Jogador banido"); } }
+</script>
+</body>
+</html>
